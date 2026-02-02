@@ -1,49 +1,44 @@
 import React, { useState } from 'react'
-import { assets, facilityIcons, roomsDummyData } from '../assets/assets'
+import { assets, facilityIcons, roomsDummyData, roomTypes, priceRanges, sortOptions } from '../assets/assets'
 import { useNavigate } from 'react-router-dom'
 import StarRating from '../components/StarRating'
+import CheckBox from '../components/CheckBox'
+import RadioButton from '../components/RadioButton'
 
-const CheckBox = ({label, selected = false, onChange = ()=>{} }) =>{
-    return(
-        <label className='flex gap-3 items-center cursor-pointer mt-2 text-sm'>
-            <input type="checkbox" checked={selected} onChange ={(e)=>onChange(e.target.checked, label)} />
-            <span className='font-light select-none'>{label}</span>
-        </label>
-    )
-}
-
-const RadioButton = ({label, selected = false, onChange = ()=>{} }) =>{
-    return(
-        <label className='flex gap-3 items-center cursor-pointer mt-2 text-sm'>
-            <input type="radio" name="sortOption" checked={selected} onChange ={()=>onChange(label)} />
-            <span className='font-light select-none'>{label}</span>
-        </label>
-    )
-}
 
 const AllRooms = () => {
     const navigate = useNavigate()
     const [openFilters, setOpenFilters] = useState(false)
 
-    const roomTypes =[
-        "Single Bed",
-        "Double Bed",
-        "Luxury Room",
-        "Family Suite"
-    ]
+    const [selectedRooms, setSelectedRooms] = useState([]);
+    const [selectedRanges, setSelectedRanges] = useState([]);
+    const [selectedSort, setSelectedSort] = useState("");
 
-    const priceRanges =[
-        "0 to 500",
-        "500 to 1000",
-        "1000 to 2000",
-        "2000 to 3000"
-    ]
+    const handleRoomChange = (checked, room) => {
+    setSelectedRooms((prev) =>
+        checked
+        ? [...prev, room]              // add
+        : prev.filter((r) => r !== room) // remove
+    );
+    };
 
-    const sortOptions =[
-        "Price Low to High",
-        "Price High to Low",
-        "Newest First"
-    ]
+    const handleRangeChange = (checked, range) => {
+    setSelectedRanges((prev) =>
+        checked
+        ? [...prev, range]              // add
+        : prev.filter((r) => r !== range) // remove
+    );
+    };
+
+    const handleSortChange = (value) => {
+        setSelectedSort(value);
+    };
+
+    const handleClear = () => {
+        setSelectedRooms([]);
+        setSelectedRanges([]);
+        setSelectedSort("");
+    }
 
   return (
     <div className='flex flex-col-reverse lg:flex-row items-start justify-between pt-28 md:pt-35 px-4 md:px-16 lg:px-24 xl:px-32'>
@@ -104,7 +99,7 @@ const AllRooms = () => {
                     <span className='lg:hidden' onClick={()=>setOpenFilters(!openFilters)}>
                         {openFilters? "HIDE" : "SHOW"}
                     </span>
-                    <span className='hidden lg:block'>CLEAR</span>
+                    <span className='hidden lg:block' onClick={handleClear}>CLEAR</span>
                 </div>
             </div>
             <div className={`${openFilters ? 'h-auto': 'h-0 lg:h-auto overflow-hidden transition-all duration-700'}`}>
@@ -112,7 +107,7 @@ const AllRooms = () => {
                     <p className='font-medium text-gray-800 pb-2'>Popular Filters</p>
                     {
                         roomTypes.map((room, index)=>(
-                            <CheckBox key={index} label={room} />
+                            <CheckBox key={index} label={room} selected={selectedRooms.includes(room)} onChangeFn={handleRoomChange}/>
                         ))
                     }
                 </div>
@@ -120,7 +115,7 @@ const AllRooms = () => {
                     <p className='font-medium text-gray-800 pb-2'>Price Range</p>
                     {
                         priceRanges.map((range, index)=>(
-                            <CheckBox key={index} label={`$ ${range}`} />
+                            <CheckBox key={index} label={`$ ${range}`} selected={selectedRanges.includes(`$ ${range}`)} onChangeFn={handleRangeChange} />
                         ))
                     }
                 </div>
@@ -128,7 +123,7 @@ const AllRooms = () => {
                     <p className='font-medium text-gray-800 pb-2'>Sort Options</p>
                     {
                         sortOptions.map((option, index)=>(
-                            <RadioButton key={index} label={option} />
+                            <RadioButton key={index} label={option} selected={selectedSort === option} onChangeFn={handleSortChange}/>
                         ))
                     }
                 </div>
